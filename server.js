@@ -6,20 +6,16 @@ const app = express();
 app.use(cors());
 
 const API_BASE = "https://api.pokemontcg.io/v2";
-const API_KEY = ""; // opcional, puedes dejarlo vacío
 
-const headers = API_KEY
-  ? { "X-Api-Key": API_KEY }
-  : {};
-
+// 🔹 TEST
 app.get("/", (req, res) => {
-  res.send("PokeCards Proxy OK");
+  res.send("Proxy Pokémon activo");
 });
 
-/* 🔹 SETS */
-app.get("/api/sets", async (req, res) => {
+// 🔹 SETS / EXPANSIONES
+app.get("/sets", async (req, res) => {
   try {
-    const r = await fetch(`${API_BASE}/sets`, { headers });
+    const r = await fetch(`${API_BASE}/sets`);
     const data = await r.json();
     res.json(data);
   } catch (e) {
@@ -27,19 +23,13 @@ app.get("/api/sets", async (req, res) => {
   }
 });
 
-/* 🔹 CARDS */
-app.get("/api/cards", async (req, res) => {
-  const setId = req.query.set;
-
-  if (!setId) {
-    return res.status(400).json({ error: "Falta set" });
-  }
+// 🔹 CARTAS POR SET
+app.get("/cards", async (req, res) => {
+  const set = req.query.set;
+  if (!set) return res.status(400).json({ error: "Falta set" });
 
   try {
-    const r = await fetch(
-      `${API_BASE}/cards?q=set.id:${setId}&pageSize=250`,
-      { headers }
-    );
+    const r = await fetch(`${API_BASE}/cards?q=set.id:${set}`);
     const data = await r.json();
     res.json(data);
   } catch (e) {
@@ -48,6 +38,6 @@ app.get("/api/cards", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () =>
-  console.log("Proxy activo en puerto", PORT)
-);
+app.listen(PORT, () => {
+  console.log("Proxy activo en puerto", PORT);
+});
