@@ -20,7 +20,6 @@ app.get("/api/sets", async (req, res) => {
     console.error("SETS ERROR:", err);
     res.status(500).json({ error: "Error cargando sets" });
   }
-});
 
 // ===== CARDS =====
 app.get("/api/cards", async (req, res) => {
