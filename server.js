@@ -3,66 +3,43 @@ import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+const API_KEY = process.env.POKEMON_API_KEY;
+
 app.use(cors());
 
-const API_KEY = process.env.POKEMON_API_KEY;
-const BASE_URL = "https://api.pokemontcg.io/v2";
-
-// 👉 Comprobación
 app.get("/", (req, res) => {
-  res.send("Proxy Pokémon activo");
+  res.json({ status: "Proxy Pokémon activo" });
 });
 
-// 👉 Sets / expansiones
-app.get("/api/sets", async (req, res) => {
+app.get("/sets", async (req, res) => {
   try {
-    const response = await fetch(`${BASE_URL}/sets`, {
-      headers: {
-        "X-Api-Key": API_KEY
-      }
+    const r = await fetch("https://api.pokemontcg.io/v2/sets", {
+      headers: { "X-Api-Key": API_KEY }
     });
-
-    if (!response.ok) {
-      throw new Error("Error API sets");
-    }
-
-    const data = await response.json();
+    const data = await r.json();
     res.json(data);
-  } catch (error) {
+  } catch (e) {
     res.status(500).json({ error: "Error cargando sets" });
   }
 });
 
-// 👉 Cartas por set
-app.get("/api/cards", async (req, res) => {
+app.get("/cards", async (req, res) => {
   const { set } = req.query;
-
-  if (!set) {
-    return res.status(400).json({ error: "Falta set" });
-  }
+  if (!set) return res.status(400).json({ error: "Falta set" });
 
   try {
-    const response = await fetch(
-      `${BASE_URL}/cards?q=set.id:${set}`,
-      {
-        headers: {
-          "X-Api-Key": API_KEY
-        }
-      }
+    const r = await fetch(
+      `https://api.pokemontcg.io/v2/cards?q=set.id:${set}`,
+      { headers: { "X-Api-Key": API_KEY } }
     );
-
-    if (!response.ok) {
-      throw new Error("Error API cards");
-    }
-
-    const data = await response.json();
+    const data = await r.json();
     res.json(data);
-  } catch (error) {
+  } catch (e) {
     res.status(500).json({ error: "Error cargando cartas" });
   }
 });
 
-const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log("Proxy activo en puerto " + PORT);
+  console.log("Proxy activo en puerto", PORT);
 });
